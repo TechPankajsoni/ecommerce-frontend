@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Listing and Detail</title>
+  <link rel="stylesheet" href="../styles/main.css" />
+</head>
+<body>
+  <header>
+    <div id="logo-container" style="display:flex; align-items:center; padding:10px;">
+      <img src="../assets/IMAGE/LOGO.png" alt="Ecommerce Logo" style="height:50px; margin-right:15px;" />
+      <h1>Product Listing and Detail Page</h1>
+    </div>
+    <nav>
+      <a href="#" id="home-link">Home</a>
+      <a href="cart.html" id="cart-link">
+        <img src="../assets/IMAGE/cartlogo.jpg" alt="Cart Logo" style="height:24px; vertical-align:middle; margin-right:5px;" />
+        Cart (<span id="cart-count">0</span>)
+      </a>
+    </nav>
+  </header>
+
+  <section id="sale-banner" style="background-color:#ff4d4d; color:white; text-align:center; padding:10px; font-weight:bold; font-size:1.2em;">
+    Sale - Up to 50% Off! Limited Time Offer!
+  </section>
+
+  <section id="home-section" style="padding:20px; background-color:#f0f0f0;">
+    <h2>Welcome to Our Ecommerce Store</h2>
+    <p>Discover the best products at unbeatable prices. Shop now and enjoy exclusive deals!</p>
+  </section>
+
+  <section id="about-section" style="padding:20px;">
+    <h2>About Us</h2>
+    <p>We are committed to providing quality products and excellent customer service. Our mission is to make your shopping experience seamless and enjoyable.</p>
+  </section>
+
+  <section id="extra-section-1" style="padding:20px; background-color:#f9f9f9;">
+    <h2>Customer Testimonials</h2>
+    <p>Hear from our satisfied customers who love our products and service.</p>
+  </section>
+
+  <section id="extra-section-2" style="padding:20px;">
+    <h2>Latest News</h2>
+    <p>Stay updated with the latest trends and offers in our store.</p>
+  </section>
+
+  <main>
+    <section id="product-listing">
+      <h2>Products</h2>
+      <div id="product-grid" class="product-grid"></div>
+    </section>
+
+    <section id="product-detail" style="display:none;">
+      <button id="back-to-listing">← Back to Products</button>
+      <div class="product-container">
+        <div class="product-image">
+          <img id="detail-image" src="" alt="Product Image" />
+        </div>
+        <div class="product-info">
+      <h2 id="detail-name"></h2>
+      <p id="detail-price"></p>
+      <p id="detail-description"></p>
+      <div class="variations">
+        <label for="size-select">Size:</label>
+        <select id="size-select"></select>
+        <label for="color-select">Color:</label>
+        <select id="color-select"></select>
+      </div>
+      <div class="quantity-selector">
+        <button id="decrease-qty">−</button>
+        <input type="text" id="quantity-input" value="1" readonly />
+        <button id="increase-qty">+</button>
+      </div>
+      <div class="total-price" id="total-price"></div>
+      <button id="add-to-cart-detail">Add to Cart</button>
+    </div>
+  </div>
+</section>
+
+    <script>
+    // Image zoom functionality
+    function imageZoom(imgID, resultID) {
+      var img, lens, result, cx, cy;
+      img = document.getElementById(imgID);
+      result = document.createElement('div');
+      result.setAttribute('id', resultID);
+      result.className = 'img-zoom-result';
+      img.parentElement.insertBefore(result, img.nextSibling);
+
+      lens = document.createElement('div');
+      lens.setAttribute('class', 'img-zoom-lens');
+      img.parentElement.insertBefore(lens, img);
+
+      cx = result.offsetWidth / lens.offsetWidth;
+      cy = result.offsetHeight / lens.offsetHeight;
+
+      result.style.backgroundImage = "url('" + img.src + "')";
+      result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+
+      lens.style.visibility = 'hidden';
+      result.style.display = 'none';
+
+      lens.addEventListener("mousemove", moveLens);
+      img.addEventListener("mousemove", moveLens);
+      lens.addEventListener("touchmove", moveLens);
+      img.addEventListener("touchmove", moveLens);
+
+      img.addEventListener("mouseenter", () => {
+        lens.style.visibility = 'visible';
+        result.style.display = 'block';
+      });
+
+      img.addEventListener("mouseleave", () => {
+        lens.style.visibility = 'hidden';
+        result.style.display = 'none';
+      });
+
+      function moveLens(e) {
+        e.preventDefault();
+        var pos, x, y;
+        pos = getCursorPos(e);
+        x = pos.x - (lens.offsetWidth / 2);
+        y = pos.y - (lens.offsetHeight / 2);
+
+        if (x > img.width - lens.offsetWidth) { x = img.width - lens.offsetWidth; }
+        if (x < 0) { x = 0; }
+        if (y > img.height - lens.offsetHeight) { y = img.height - lens.offsetHeight; }
+        if (y < 0) { y = 0; }
+
+        lens.style.left = x + "px";
+        lens.style.top = y + "px";
+
+        result.style.backgroundPosition = "-" + (x * cx) + "px -" + (y * cy) + "px";
+      }
+
+      function getCursorPos(e) {
+        var a, x = 0, y = 0;
+        e = e || window.event;
+        // Get the x and y positions of the image
+        a = img.getBoundingClientRect();
+        // Calculate the cursor's x and y coordinates, relative to the image
+        x = e.pageX - a.left - window.pageXOffset;
+        y = e.pageY - a.top - window.pageYOffset;
+        // Consider boundaries
+        if (x < 0) {x = 0;}
+        if (y < 0) {y = 0;}
+        if (x > img.width) {x = img.width;}
+        if (y > img.height) {y = img.height;}
+        return {x : x, y : y};
+      }
+    }
+    // End of imageZoom function
+
+    let allProducts = [];
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const productGrid = document.getElementById('product-grid');
+    const productListingSection = document.getElementById('product-listing');
+    const productDetailSection = document.getElementById('product-detail');
+    const backToListingBtn = document.getElementById('back-to-listing');
+
+    const detailImage = document.getElementById('detail-image');
+    const detailName = document.getElementById('detail-name');
+    const detailPrice = document.getElementById('detail-price');
+    const detailDescription = document.getElementById('detail-description');
+    const addToCartDetailBtn = document.getElementById('add-to-cart-detail');
+    const cartCountElement = document.getElementById('cart-count');
+
+    function updateCartCount() {
+      const totalCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      cartCountElement.innerText = totalCount;
+    }
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+    }
+
+    function addToCart(product) {
+      const existing = cart.find(item => item.id === product.id);
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        product.quantity = 1;
+        cart.push(product);
+      }
+      saveCart();
+    }
+
+    function renderProductList() {
+      productGrid.innerHTML = '';
+      allProducts.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.setAttribute('data-id', product.id);
+      card.innerHTML = `
+          <img src="${product.image}" alt="${product.title}" loading="lazy" />
+          <h3>${product.title}</h3>
+          <p>$${product.price.toFixed(2)}</p>
+          <button class="add-to-cart">Add to Cart</button>
+          <button class="view-details">View Details</button>
+        `;
+        productGrid.appendChild(card);
+      });
+    }
+
+function showProductDetail(productId) {
+  // Convert productId to number if it's a string
+  const id = typeof productId === 'string' ? parseInt(productId, 10) : productId;
+  const product = allProducts.find(p => p.id === id);
+  if (!product) {
+    alert('Product not found. Please go back to the product list.');
+    return;
+  }
+
+  detailImage.src = product.image;
+  detailImage.alt = product.title;
+  detailName.textContent = product.title;
+  detailPrice.textContent = `$${product.price.toFixed(2)}`;
+  detailDescription.textContent = product.description;
+
+      // Populate variation selectors
+      const sizeSelect = document.getElementById('size-select');
+      const colorSelect = document.getElementById('color-select');
+      const quantityInput = document.getElementById('quantity-input');
+      const totalPriceElement = document.getElementById('total-price');
+
+  // Clear previous options
+  sizeSelect.innerHTML = '';
+  colorSelect.innerHTML = '';
+
+  // Sample variations for demonstration (replace with real data as needed)
+  const variations = {
+    size: ['S', 'M', 'L', 'XL'],
+    color: [
+      { name: 'Red', available: true },
+      { name: 'Blue', available: false },
+      { name: 'Green', available: true }
+    ]
+  };
+
+  // Populate size options
+  variations.size.forEach(size => {
+    const option = document.createElement('option');
+    option.value = size;
+    option.textContent = size;
+    sizeSelect.appendChild(option);
+  });
+
+  // Populate color options
+  variations.color.forEach(color => {
+    const option = document.createElement('option');
+    option.value = color.name;
+    option.textContent = color.name + (color.available ? '' : ' (Unavailable)');
+    option.disabled = !color.available;
+    colorSelect.appendChild(option);
+  });
+
+  // Set initial quantity and total price
+  quantityInput.value = 1;
+  totalPriceElement.textContent = `$${product.price.toFixed(2)}`;
+
+  // Update total price based on quantity
+  function updateTotalPrice() {
+    const quantity = parseInt(quantityInput.value, 10);
+    const total = (product.price * quantity).toFixed(2);
+    totalPriceElement.textContent = `$${total}`;
+  }
+
+  // Quantity selector buttons
+  const decreaseQtyBtn = document.getElementById('decrease-qty');
+  const increaseQtyBtn = document.getElementById('increase-qty');
+
+  decreaseQtyBtn.onclick = () => {
+    let qty = parseInt(quantityInput.value, 10);
+    if (qty > 1) {
+      quantityInput.value = qty - 1;
+      updateTotalPrice();
+    }
+  };
+
+  increaseQtyBtn.onclick = () => {
+    let qty = parseInt(quantityInput.value, 10);
+    if (qty < 10) {
+      quantityInput.value = qty + 1;
+      updateTotalPrice();
+    }
+  };
+
+  // Update total price when color changes (optional: could update image)
+  colorSelect.onchange = () => {
+    updateTotalPrice();
+  };
+
+  productListingSection.style.display = 'none';
+  productDetailSection.style.display = 'block';
+
+  addToCartDetailBtn.onclick = () => {
+    const selectedSize = sizeSelect.value;
+    const selectedColor = colorSelect.value;
+    const quantity = parseInt(quantityInput.value, 10);
+    addToCart({ ...product, selectedSize, selectedColor, quantity });
+    addToCartDetailBtn.textContent = 'Added to Cart!';
+    setTimeout(() => {
+      addToCartDetailBtn.textContent = 'Add to Cart';
+    }, 1500);
+  };
+}
+
+    backToListingBtn.onclick = () => {
+      productDetailSection.style.display = 'none';
+      productListingSection.style.display = 'block';
+    };
+
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('add-to-cart')) {
+        const card = e.target.closest('.product-card');
+        const id = parseInt(card.getAttribute('data-id'));
+        const product = allProducts.find(p => p.id === id);
+        if (product) {
+          addToCart(product);
+          e.target.textContent = 'Added to Cart!';
+          setTimeout(() => {
+            e.target.textContent = 'Add to Cart';
+          }, 1500);
+        }
+      } else if (e.target.classList.contains('view-details')) {
+        const card = e.target.closest('.product-card');
+        const id = parseInt(card.getAttribute('data-id'));
+        showProductDetail(id);
+      }
+    });
+
+    // Fetch products and initialize
+    fetch('https://fakestoreapi.com/products')
+      .then(res => res.json())
+      .then(products => {
+        allProducts = products;
+        renderProductList();
+        updateCartCount();
+        
+        // Check if we have a product ID in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        if (productId) {
+          showProductDetail(parseInt(productId));
+        }
+      })
+      .catch(err => {
+        productGrid.innerHTML = '<p>Error loading products.</p>';
+        console.error(err);
+      });
+  </script>
+    <script src="../scripts/app.js"></script> <!-- Common script -->
+</body>
+</html>
