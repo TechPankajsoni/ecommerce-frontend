@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/cart.css">
+    <link rel="stylesheet" href="../styles/add-to-cart-message.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="../assets/IMAGE/LOGO.png" alt="Logo">
+        </div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="product.html">Products</a></li>
+                <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </nav>
+        <div class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </header>
+
+    <main class="cart-container">
+        <h1>Shopping Cart</h1>
+        
+        <div class="cart-content">
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be dynamically loaded here -->
+            </div>
+            
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping:</span>
+                    <span>$5.00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+                
+                <button id="continue-shopping" class="btn-secondary" onclick="window.location.href='index.html'">Continue Shopping</button>
+                <button id="checkout-btn" class="btn-primary" disabled>Proceed to Checkout</button>
+                
+                <div class="empty-cart-message" id="empty-cart" style="display: none;">
+                    <h3>Your cart is empty</h3>
+                    <p>Add some products to get started!</p>
+                    <button onclick="window.location.href='product.html'" class="btn-primary">Browse Products</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Your E-commerce Store. All rights reserved.</p>
+    </footer>
+
+    <script src="../scripts/cart-manager.js"></script>
+    <script src="../scripts/cart-page.js"></script>
+</body>
+</html>

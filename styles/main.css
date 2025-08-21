@@ -5,7 +5,7 @@ body {
   background-color: #f9f9f9;
 }
 
-/* Header Styles */
+
 header {
   display: flex;
   justify-content: space-between;
@@ -314,40 +314,47 @@ header {
   text-decoration: none;
 }
 
-@media (min-width: 768px) {
-  .product-container {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-/* Add to your main.css */
-.product-card-content {
-  cursor: pointer;
+/* Zoom container */
+.img-zoom-container {
+  position: relative;
 }
 
-.add-to-cart {
-  cursor: pointer;
-  pointer-events: auto; /* Ensure button is clickable */
+/* Zoom lens */
+.img-zoom-lens {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  width: 100px;
+  height: 100px;
+  /* adjust size as needed */
+  visibility: hidden;
+  cursor: crosshair;
+  background-color: rgba(255, 255, 255, 0.4);
 }
-body {
-    font-family: Arial, sans-serif;
+
+/* Zoom result */
+.img-zoom-result {
+  border: 1px solid #d4d4d4;
+  width: 300px;
+  height: 300px;
+  position: absolute;
+  top: 0;
+  left: 110%;
+  background-repeat: no-repeat;
+  background-size: 800px 800px; /* adjust based on image size */
+  display: none;
+  z-index: 1000;
 }
-header {
-    background: #f8f8f8;
-    padding: 10px;
-    text-align: center;
-}
-nav a {
-    margin: 0 15px;
-    text-decoration: none;
-}
-.product-image img {
-    max-width: 100%;
-    height: auto;
-}
-.product-info {
-    margin-top: 20px;
-}
-footer {
-    text-align: center;
-    margin-top: 20px;
+
+/* Responsive for mobile */
+@media (max-width: 768px) {
+  .img-zoom-lens {
+    width: 60px;
+    height: 60px;
+  }
+  .img-zoom-result {
+    width: 200px;
+    height: 200px;
+    left: 0;
+    top: 110%;
+  }
 }

@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        button { margin: 5px; padding: 10px; }
+        #cart-display { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Cart System Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Add Product to Cart</h2>
+        <button onclick="testAddToCart()">Add Test Product</button>
+        <div id="test1-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Check Local Storage</h2>
+        <button onclick="testLocalStorage()">Check Storage</button>
+        <div id="test2-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Cart Count Update</h2>
+        <div>Cart Count: <span id="cart-count">0</span></div>
+        <button onclick="testCartCount()">Update Count</button>
+        <div id="test3-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Duplicate Item Handling</h2>
+        <button onclick="testDuplicateItem()">Add Duplicate</button>
+        <div id="test4-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 5: Clear Cart</h2>
+        <button onclick="testClearCart()">Clear Cart</button>
+        <div id="test5-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Current Cart Contents</h2>
+        <div id="cart-display">Empty</div>
+    </div>
+
+    <script src="./scripts/cart-manager.js"></script>
+    <script>
+        // Test functions
+        function testAddToCart() {
+            const testProduct = {
+                id: 'test-shirt-001',
+                name: 'Test T-Shirt',
+                price: 29.99,
+                image: 'test-image.jpg'
+            };
+            
+            try {
+                CartManager.addToCart(testProduct, 'M', 'blue', 2);
+                document.getElementById('test1-result').innerHTML = 
+                    '<span class="success">✓ Product added successfully</span>';
+                updateCartDisplay();
+            } catch (error) {
+                document.getElementById('test1-result').innerHTML = 
+                    '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+        
+        function testLocalStorage() {
+            const cart = CartManager.getCart();
+            const stored = localStorage.getItem('cart');
+            
+            if (stored && cart.length > 0) {
+                document.getElementById('test2-result').innerHTML = 
+                    '<span class="success">✓ Data persisted in localStorage</span>';
+            } else {
+                document.getElementById('test2-result').innerHTML = 
+                    '<span class="error">✗ No data found in localStorage</span>';
+            }
+        }
+        
+        function testCartCount() {
+            const cart = CartManager.getCart();
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+            document.getElementById('test3-result').innerHTML = 
+                `<span class="success">✓ Cart count updated: ${count}</span>`;
+        }
+        
+        function testDuplicateItem() {
+            const testProduct = {
+                id: 'test-shirt-001',
+                name: 'Test T-Shirt',
+                price: 29.99,
+                image: 'test-image.jpg'
+            };
+            
+            // Add same product again
+            CartManager.addToCart(testProduct, 'M', 'blue', 3);
+            const cart = CartManager.getCart();
+            const item = cart.find(i => i.cartItemId === 'test-shirt-001-M-blue');
+            
+            if (item && item.quantity === 5) { // 2 + 3 = 5
+                document.getElementById('test4-result').innerHTML = 
+                    '<span class="success">✓ Duplicate handled correctly (quantity: 5)</span>';
+            } else {
+                document.getElementById('test4-result').innerHTML = 
+                    '<span class="error">✗ Duplicate handling failed</span>';
+            }
+            updateCartDisplay();
+        }
+        
+        function testClearCart() {
+            CartManager.clearCart();
+            const cart = CartManager.getCart();
+            
+            if (cart.length === 0) {
+                document.getElementById('test5-result').innerHTML = 
+                    '<span class="success">✓ Cart cleared successfully</span>';
+                document.getElementById('cart-count').textContent = '0';
+            } else {
+                document.getElementById('test5-result').innerHTML = 
+                    '<span class="error">✗ Cart not cleared</span>';
+            }
+            updateCartDisplay();
+        }
+        
+        function updateCartDisplay() {
+            const cart = CartManager.getCart();
+            const display = document.getElementById('cart-display');
+            
+            if (cart.length === 0) {
+                display.innerHTML = 'Cart is empty';
+            } else {
+                display.innerHTML = '<h4>Cart Items:</h4>' + 
+                    cart.map(item => `
+                        <div>
+                            ${item.name} - ${item.selectedSize} - ${item.selectedColor} 
+                            - Qty: ${item.quantity} - $${item.price}
+                        </div>
+                    `).join('');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartDisplay();
+            testCartCount();
+        });
+    </script>
+</body>
+</html>
